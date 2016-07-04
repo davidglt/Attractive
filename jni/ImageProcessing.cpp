@@ -1,3 +1,9 @@
+/*****************************************************************************
+ *  Attractive, for Android.
+ *  GNU GPLv3
+ *  by David Gonzalez, 2016 (davidglt@hotmail.com)
+ *****************************************************************************/
+
 #include <jni.h>
 #include <android/log.h>
 #include <opencv2/core/core.hpp>

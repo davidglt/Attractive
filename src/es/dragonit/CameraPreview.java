@@ -1,6 +1,9 @@
-/*
-*  CameraPreview.java
-*/
+/*****************************************************************************
+ *  Attractive, for Android.
+ *  GNU GPLv3
+ *  by David Gonzalez, 2016 (davidglt@hotmail.com)
+ *****************************************************************************/
+
 package es.dragonit;
 
 import java.io.IOException;

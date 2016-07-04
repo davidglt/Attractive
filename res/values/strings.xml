@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, AttractiveProcessing!</string>
     <string name="app_name">Attractive</string>
     <string name="camera">CAMERA</string>
     <string name="matched">LAST MATCHED</string>
     <string name="wait">Please wait a few seconds with focus on your face</string>
+    <string name="msg_codename">Nombre en clave: Attractive</string>
+    <string name="msg_soporte">Support:</string>
+    <string name="msg_soporte_email">  - email: davidglt@hotmail.com</string>
+    <string name="msg_copyright">&#169; 2016 David Gonzalez</string>
+    <string name="msg_version">- Version: </string>
+    <string name="msg_license">GNU GPLv3</string>
+    <string name="url_github">https://github.com/davidglt/Attractive.git</string>
+    <string name="mMenuAbout">About</string>
+    <string name="mMenuFinish">Quit</string>
 </resources>

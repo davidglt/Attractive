@@ -1,3 +1,9 @@
+#/*****************************************************************************
+# *  Attractive, for Android.
+# *  GNU GPLv3
+# *  by David Gonzalez, 2016 (davidglt@hotmail.com)
+# *****************************************************************************/
+
 APP_OPTIM := release
 APP_ABI := armeabi-v7a
 APP_STL := gnustl_shared

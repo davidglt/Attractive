@@ -1,3 +1,9 @@
+/*****************************************************************************
+ *  Attractive, for Android.
+ *  GNU GPLv3
+ *  by David Gonzalez, 2016 (davidglt@hotmail.com)
+ *****************************************************************************/
+
 package es.dragonit;
 
 import java.io.File;
@@ -5,25 +11,29 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import es.dragonit.R;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 public class Attractive extends Activity 
 {
+	private FrameLayout mainLayout;
 	private CameraPreview camPreview;
 	private ImageView MyCameraPreview = null;
 	private ViewGroup secondaryLayout;
@@ -47,7 +57,7 @@ public class Attractive extends Activity
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,  
 				 			WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //Set this APK no title
-        requestWindowFeature(Window.FEATURE_NO_TITLE);  
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);  
         setContentView(R.layout.main);
                 
         //
@@ -149,4 +159,33 @@ public class Attractive extends Activity
           out.write(buffer, 0, read);
         }
     }
+    
+    /** Called when the menubar is being created by Android. */
+    public boolean onCreateOptionsMenu(Menu menu) {
+    	// Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.attractive, menu);
+        return true;
+    }
+
+    /** Called whenever the user pressed a menu item in the menubar. */
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	
+    	switch (item.getItemId()) {
+        	case R.id.mMenuAbout:
+        		launchAbout(mainLayout);
+        		return true;
+        	case R.id.mMenuFinish:
+        		finish();
+        		return true;
+        	default:
+        		return super.onOptionsItemSelected(item);
+    	}
+    }
+      
+    /** About to. */
+    public void launchAbout (View view) {
+    	Intent i = new Intent (this, MenuAbout.class);
+    	startActivity (i);
+    }
+
 }

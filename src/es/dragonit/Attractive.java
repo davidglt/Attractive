@@ -50,14 +50,12 @@ public class Attractive extends Activity
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotSleep");
 
-        // copy needed files to SD
+        // Copy needed files to SD
         CopyAssets();
         
-        //Set this APK Full screen
+        // Set this APK Full screen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,  
-				 			WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        //Set this APK no title
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);  
+				 			WindowManager.LayoutParams.FLAG_FULLSCREEN); 
         setContentView(R.layout.main);
                 
         //

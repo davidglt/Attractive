@@ -32,6 +32,7 @@ public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCall
 	private int PreviewSizeWidth;
  	private int PreviewSizeHeight;
  	private boolean bProcessing = false;
+ 	Integer previewFormat = 17; 
 	
  	Handler mHandler = new Handler(Looper.getMainLooper());
  	
@@ -48,10 +49,9 @@ public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCall
 	@Override
 	public void onPreviewFrame(byte[] arg0, Camera arg1) 
 	{
-		// At preview mode, the frame data will push to here.
+		//We only accept the NV21(YUV420) format.
 		if (imageFormat == ImageFormat.NV21)
-        {
-			//We only accept the NV21(YUV420) format.
+		{
 			if ( !bProcessing )
 			{
 				FrameData = arg0;
@@ -68,11 +68,9 @@ public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCall
 	    parameters = mCamera.getParameters();
 		// Set the camera preview size
 		parameters.setPreviewSize(PreviewSizeWidth, PreviewSizeHeight);
-        
+		parameters.setPreviewFormat(previewFormat);
 		imageFormat = parameters.getPreviewFormat();
-		
 		mCamera.setParameters(parameters);
-		
 		mCamera.startPreview();
 	}
 
@@ -162,7 +160,7 @@ public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCall
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                	mCamera = Camera.open(CameraInfo.CAMERA_FACING_FRONT);;
+                	mCamera = Camera.open(CameraInfo.CAMERA_FACING_FRONT);
                     notifyCameraOpened();
                 }
             });

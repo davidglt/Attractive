@@ -98,90 +98,78 @@ get_landmarks (Mat frame)
   nose_cascade.load (nose_cascade_name);
   mouth_cascade.load (mouth_cascade_name);
 
-  for (int i = 0; i < 10; i++)
-    {
-      lm[i] = 0;
-    }
+  for (int i = 0; i < 10; i++) {
+    lm[i] = 0;
+  }
 
   face_cascade.detectMultiScale (frame, faces, 1.3, 5,
 				 0 | CV_HAAR_SCALE_IMAGE, Size (30, 30));
 
-  for (size_t i = 0; i < faces.size (); i++)
-    {
-      Mat faceROI = frame (faces[i]);
+  for (size_t i = 0; i < faces.size (); i++) {
+    Mat faceROI = frame (faces[i]);
 
-      // Eyes detect
-      eye_cascade.detectMultiScale (faceROI, eyes);
+    // Eyes detect
+    eye_cascade.detectMultiScale (faceROI, eyes);
 
-      // 2 eyes condition
-      if (eyes.size () == 2)
-	{
+    // Two eyes condition
+    if (eyes.size () == 2) {
 
 	  // The left eye first
-	  if (eyes[0].x < eyes[1].x)
-	    {
-	      eye1.x = (faces[i].x + eyes[0].x + eyes[0].width / 2);
-	      eye1.y = (faces[i].y + eyes[0].y + eyes[0].height / 2);
-	      eye2.x = (faces[i].x + eyes[1].x + eyes[1].width / 2);
-	      eye2.y = (faces[i].y + eyes[1].y + eyes[1].height / 2);
-	    }
-	  else
-	    {
-	      eye1.x = (faces[i].x + eyes[1].x + eyes[1].width / 2);
-	      eye1.y = (faces[i].y + eyes[1].y + eyes[1].height / 2);
-	      eye2.x = (faces[i].x + eyes[0].x + eyes[0].width / 2);
-	      eye2.y = (faces[i].y + eyes[0].y + eyes[0].height / 2);
-	    }
+	  if (eyes[0].x < eyes[1].x) {
+	    eye1.x = (faces[i].x + eyes[0].x + eyes[0].width / 2);
+	    eye1.y = (faces[i].y + eyes[0].y + eyes[0].height / 2);
+	    eye2.x = (faces[i].x + eyes[1].x + eyes[1].width / 2);
+	    eye2.y = (faces[i].y + eyes[1].y + eyes[1].height / 2);
+	  }
+	  else {
+	    eye1.x = (faces[i].x + eyes[1].x + eyes[1].width / 2);
+	    eye1.y = (faces[i].y + eyes[1].y + eyes[1].height / 2);
+	    eye2.x = (faces[i].x + eyes[0].x + eyes[0].width / 2);
+	    eye2.y = (faces[i].y + eyes[0].y + eyes[0].height / 2);
+	  }
 	  distance = dist (eye1, eye2);
 
 	  // Distance between eyes condition
-	  if (distance > min_distance)
-	    {
+	  if (distance > min_distance) {
 
-	      // Nose detect
-	      nose_cascade.detectMultiScale (faceROI, nose);
+	    // Nose detect
+	    nose_cascade.detectMultiScale (faceROI, nose);
 
-	      // 1 nose condition
-	      if (nose.size () == 1)
-		{
+	    // One nose condition
+	    if (nose.size () == 1) {
 		  nose1.x = (faces[i].x + nose[0].x + nose[0].width / 2);
 		  nose1.y = (faces[i].y + nose[0].y + nose[0].height / 2);
 
 		  // Nose below one eye condition
-		  if ((nose1.y > eye1.y) or (nose1.y > eye2.y))
-		    {
-		      nose_cond = false;
+		  if ((nose1.y > eye1.y) or (nose1.y > eye2.y)) {
+		    nose_cond = false;
 
-		      // Mouth detect
-		      mouth_cascade.detectMultiScale (faceROI, mouth);
+		    // Mouth detect
+		    mouth_cascade.detectMultiScale (faceROI, mouth);
 
-		      // 1 mouth condition, the other 2 are eyes
-		      if (mouth.size () == 3)
-			{
+		    // One mouth condition, the other two are eyes
+		    if (mouth.size () == 3) {
 			  mouth1.x = ((faces[i].x + mouth[2].x) * 1.05);
 			  mouth1.y = (faces[i].y + mouth[2].y +
-				      mouth[2].height / 2);
+		        mouth[2].height / 2);
 			  mouth2.x = ((faces[i].x + mouth[2].x +
-				       mouth[2].width) * 0.95);
+				mouth[2].width) * 0.95);
 			  mouth2.y = (faces[i].y + mouth[2].y +
-				      mouth[2].height / 2);
+				mouth[2].height / 2);
 			  // Mouth below nose condition
-			  if (mouth1.y > nose1.y)
-			    mouth_cond = false;
+			  if (mouth1.y > nose1.y) mouth_cond = false;
 			}
-		    }
+		  }
 		}
-	      // if nose is not detected, we estimate it
-	      if (nose_cond)
-		{
+	    // If nose is not detected, we estimate it
+	    if (nose_cond) {
 		  nose1.x = ((eye1.x + eye2.x) / 2);
 		  nose1.y = ((eye1.y + eye2.y) / 2) + (faces[i].height / 5);
 		  LOGI (APP, "No nose detected");
 		}
 
-	      // if mouth is not detected, we estimate it
-	      if (mouth_cond)
-		{
+	    // If mouth is not detected, we estimate it
+	    if (mouth_cond) {
 		  mouth1.x = (eye1.x + (nose1.x - eye1.x) / 5);
 		  mouth1.y = (nose1.y + (nose1.y - eye2.y));
 		  mouth2.x = (eye2.x - (eye2.x - nose1.x) / 5);
@@ -189,19 +177,19 @@ get_landmarks (Mat frame)
 		  LOGI (APP, "No mouth detected");
 		}
 
-	      lm[0] = eye1.x;
-	      lm[1] = eye1.y;
-	      lm[2] = eye2.x;
-	      lm[3] = eye2.y;
-	      lm[4] = nose1.x;
-	      lm[5] = nose1.y;
-	      lm[6] = mouth1.x;
-	      lm[7] = mouth1.y;
-	      lm[8] = mouth2.x;
-	      lm[9] = mouth2.y;
-	    }
-	}
+	    lm[0] = eye1.x;
+	    lm[1] = eye1.y;
+	    lm[2] = eye2.x;
+	    lm[3] = eye2.y;
+	    lm[4] = nose1.x;
+	    lm[5] = nose1.y;
+	    lm[6] = mouth1.x;
+	    lm[7] = mouth1.y;
+	    lm[8] = mouth2.x;
+	    lm[9] = mouth2.y;
+      }
     }
+  }
   return lm;
 }
 
@@ -236,56 +224,46 @@ get_sift (Mat frame)
   // Detect the landmarks
   plandmarks = get_landmarks (frame_gray);
 
-  if (*(plandmarks) != 0)
-    {
-      for (int i = 0; i < 5; i++)
-	{
+  if (*(plandmarks) != 0) {
+    for (int i = 0; i < 5; i++) {
 	  x = (int) (*(plandmarks + 2 * i));
 	  y = (int) (*(plandmarks + 2 * i + 1));
 	  inputs.push_back (Point (x, y));
-	  if (i < 2)
-	    {
-	      LOGI (APP, "Eyes: (%d, %d)", inputs[i].x, inputs[i].y);
-	    }
-	  else if (i == 2)
-	    {
-	      LOGI (APP, "Nose: (%d, %d)", inputs[i].x, inputs[i].y);
-	    }
-	  else
-	    {
-	      LOGI (APP, "Mouth: (%d, %d)", inputs[i].x, inputs[i].y);
-	    }
+	  if (i < 2) {
+	    LOGI (APP, "Eyes: (%d, %d)", inputs[i].x, inputs[i].y);
+	  }
+	  else if (i == 2) {
+	    LOGI (APP, "Nose: (%d, %d)", inputs[i].x, inputs[i].y);
+	  }
+	  else {
+	    LOGI (APP, "Mouth: (%d, %d)", inputs[i].x, inputs[i].y);
+	  }
 	}
 
-      distance = dist (inputs[0], inputs[1]);
+    distance = dist (inputs[0], inputs[1]);
 
-      // Draw a circle around the landmarks
-      for (int i = 0; i < 5; i++)
-	{
-	  circle (frame, inputs[i], distance * 0.25,
-		  Scalar (0, 255, 0, 0), 8, 8, 0);
+    // Draw a circle around the landmarks
+    for (int i = 0; i < 5; i++)	{
+      circle (frame, inputs[i], distance * 0.25,
+        Scalar (0, 255, 0, 0), 8, 8, 0);
 	}
 
-      if (distance > min_distance)
-	{
+    if (distance > min_distance) {
 	  // key points coordinates and sizes assigned
-	  for (size_t i = 0; i < inputs.size (); i++)
-	    {
+	  for (size_t i = 0; i < inputs.size (); i++) {
 	      kp.push_back (cv::KeyPoint (inputs[i], distance * 0.25));
-	    }
+	  }
 
 	  // Compute the keypoints to extract the SIFT information
 	  sift.compute (frame_gray, kp, descriptors);
 
 	  // Concatenate the SIFT landmarks information
-	  for (int i = 0; i < descriptors.rows; i++)
-	    {
-	      for (int j = 0; j < descriptors.cols; j++)
-		{
+	  for (int i = 0; i < descriptors.rows; i++) {
+        for (int j = 0; j < descriptors.cols; j++) {
 		  dense.at < float >(0, 128 * i + j) =
 		    descriptors.at < float >(i, j);
 		}
-	    }
+	  }
 
 	  // Normalize the data with l2 norm
 	  normalize (dense, ndense, 1, 0, NORM_L2);
@@ -326,13 +304,12 @@ get_sift (Mat frame)
 
 	  imageok = true;
 	}
-    }
+  }
   return imageok;
 }
 
 int
-dist (Point point1, Point point2)
-{
+dist (Point point1, Point point2) {
   // Euclid distance
 
   int dx = point2.x - point1.x;

@@ -9,6 +9,7 @@ package es.dragonit;
 import java.io.IOException;
 
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -21,7 +22,7 @@ import android.hardware.Camera.Parameters;
 
 public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCallback
 {
-	private Camera mCamera = null;
+	private static Camera mCamera = null;
 	private ImageView MyCameraPreview = null;
 	private Bitmap bitmap = null;
 	private Bitmap lastok_bitmap = null;
@@ -78,7 +79,9 @@ public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCall
 	@Override
 	public void surfaceCreated(SurfaceHolder arg0) 
 	{
-		mCamera = Camera.open(CameraInfo.CAMERA_FACING_FRONT);
+		//mCamera = Camera.open(CameraInfo.CAMERA_FACING_FRONT);
+		// Open in a thread, not in UI
+		startCamera();
 		try
 		{
 			// If did not set the SurfaceHolder, the preview area will be black.
@@ -131,4 +134,44 @@ public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCall
 			bProcessing = false;
         }
     };
+    
+    private void startCamera() {
+        if (mThread == null) {
+            mThread = new CameraHandlerThread();
+        }
+
+        synchronized (mThread) {
+            mThread.openCamera();
+        }
+    }
+    private CameraHandlerThread mThread = null;
+    private static class CameraHandlerThread extends HandlerThread {
+        Handler mHandler = null;
+
+        CameraHandlerThread() {
+            super("CameraHandlerThread");
+            start();
+            mHandler = new Handler(getLooper());
+        }
+
+        synchronized void notifyCameraOpened() {
+            notify();
+        }
+
+        void openCamera() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                	mCamera = Camera.open(CameraInfo.CAMERA_FACING_FRONT);;
+                    notifyCameraOpened();
+                }
+            });
+            try {
+                wait();
+            }
+            catch (InterruptedException e) {
+            }
+        }
+    }
+
    }

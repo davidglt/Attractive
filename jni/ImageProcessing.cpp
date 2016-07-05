@@ -226,19 +226,19 @@ get_sift (Mat frame)
 
   if (*(plandmarks) != 0) {
     for (int i = 0; i < 5; i++) {
-	  x = (int) (*(plandmarks + 2 * i));
-	  y = (int) (*(plandmarks + 2 * i + 1));
-	  inputs.push_back (Point (x, y));
-	  if (i < 2) {
-	    LOGI (APP, "Eyes: (%d, %d)", inputs[i].x, inputs[i].y);
-	  }
-	  else if (i == 2) {
-	    LOGI (APP, "Nose: (%d, %d)", inputs[i].x, inputs[i].y);
-	  }
-	  else {
-	    LOGI (APP, "Mouth: (%d, %d)", inputs[i].x, inputs[i].y);
-	  }
-	}
+      x = (int) (*(plandmarks + 2 * i));
+      y = (int) (*(plandmarks + 2 * i + 1));
+      inputs.push_back (Point (x, y));
+      if (i < 2) {
+        LOGI (APP, "Eyes: (%d, %d)", inputs[i].x, inputs[i].y);
+      }
+      else if (i == 2) {
+        LOGI (APP, "Nose: (%d, %d)", inputs[i].x, inputs[i].y);
+      }
+      else {
+        LOGI (APP, "Mouth: (%d, %d)", inputs[i].x, inputs[i].y);
+      }
+    }
 
     distance = dist (inputs[0], inputs[1]);
 
@@ -246,64 +246,64 @@ get_sift (Mat frame)
     for (int i = 0; i < 5; i++)	{
       circle (frame, inputs[i], distance * 0.25,
         Scalar (0, 255, 0, 0), 8, 8, 0);
-	}
+    }
 
     if (distance > min_distance) {
-	  // key points coordinates and sizes assigned
-	  for (size_t i = 0; i < inputs.size (); i++) {
-	      kp.push_back (cv::KeyPoint (inputs[i], distance * 0.25));
-	  }
+      // key points coordinates and sizes assigned
+      for (size_t i = 0; i < inputs.size (); i++) {
+        kp.push_back (cv::KeyPoint (inputs[i], distance * 0.25));
+      }
 
-	  // Compute the keypoints to extract the SIFT information
-	  sift.compute (frame_gray, kp, descriptors);
+      // Compute the keypoints to extract the SIFT information
+      sift.compute (frame_gray, kp, descriptors);
 
-	  // Concatenate the SIFT landmarks information
-	  for (int i = 0; i < descriptors.rows; i++) {
+      // Concatenate the SIFT landmarks information
+      for (int i = 0; i < descriptors.rows; i++) {
         for (int j = 0; j < descriptors.cols; j++) {
-		  dense.at < float >(0, 128 * i + j) =
-		    descriptors.at < float >(i, j);
-		}
-	  }
+          dense.at < float >(0, 128 * i + j) =
+            descriptors.at < float >(i, j);
+        }
+      }
 
-	  // Normalize the data with l2 norm
-	  normalize (dense, ndense, 1, 0, NORM_L2);
+      // Normalize the data with l2 norm
+      normalize (dense, ndense, 1, 0, NORM_L2);
 
-	  SVM clf1;
-	  SVM clf2;
+      SVM clf1;
+      SVM clf2;
 
-	  // Loading the models
-	  clf1.load ("/sdcard/attractive/models/svm_Male.dat");
-	  clf2.load ("/sdcard/attractive/models/svm_Attractive.dat");
+      // Loading the models
+      clf1.load ("/sdcard/attractive/models/svm_Male.dat");
+      clf2.load ("/sdcard/attractive/models/svm_Attractive.dat");
 
-	  // Predict the 2 attributes (male & attractive)
-	  result1 = clf1.predict (ndense);
-	  result2 = clf2.predict (ndense);
+      // Predict the 2 attributes (male & attractive)
+      result1 = clf1.predict (ndense);
+      result2 = clf2.predict (ndense);
 
-	  LOGI (APP, "Male: %f", result1);
-	  LOGI (APP, "Attractive: %f", result2);
+      LOGI (APP, "Male: %f", result1);
+      LOGI (APP, "Attractive: %f", result2);
 
-	  // Display the results on the frame
-	  if (result1 == -1)
-	    text1 = "WOMAN";
-	  else if (result1 == 1)
-	    text1 = "MAN";
-	  else
-	    text1 = "ERROR1";
+      // Display the results on the frame
+      if (result1 == -1)
+        text1 = "WOMAN";
+      else if (result1 == 1)
+        text1 = "MAN";
+      else
+        text1 = "ERROR1";
 
-	  if (result2 == -1)
-	    text2 = "UNATTRACTIVE";
-	  else if (result1 == 1)
-	    text2 = "ATTRACTIVE";
-	  else
-	    text2 = "ERROR2";
+      if (result2 == -1)
+        text2 = "UNATTRACTIVE";
+      else if (result1 == 1)
+        text2 = "ATTRACTIVE";
+      else
+        text2 = "ERROR2";
 
-	  putText (frame, text2, Point2i (0, 50), FONT_HERSHEY_SIMPLEX, 2,
-		   Scalar (0, 255, 0, 0), 3);
-	  putText (frame, text1, Point2i (0, 100), FONT_HERSHEY_SIMPLEX, 2,
-		   Scalar (0, 255, 0, 0), 3);
+      putText (frame, text2, Point2i (0, 50), FONT_HERSHEY_SIMPLEX, 2,
+        Scalar (0, 255, 0, 0), 3);
+      putText (frame, text1, Point2i (0, 100), FONT_HERSHEY_SIMPLEX, 2,
+        Scalar (0, 255, 0, 0), 3);
 
-	  imageok = true;
-	}
+      imageok = true;
+    }
   }
   return imageok;
 }

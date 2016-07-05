@@ -33,9 +33,9 @@ int min_distance = 60;
 
 extern "C" jboolean
 Java_es_dragonit_CameraPreview_ImageProcessing (JNIEnv * env, jobject thiz,
-						jint width, jint height,
-						jbyteArray yuv,
-						jintArray bgra)
+  jint width, jint height,
+  jbyteArray yuv,
+  jintArray bgra)
 {
   jbyte *_yuv = env->GetByteArrayElements (yuv, 0);
   jint *_bgra = env->GetIntArrayElements (bgra, 0);
@@ -103,7 +103,7 @@ get_landmarks (Mat frame)
   }
 
   face_cascade.detectMultiScale (frame, faces, 1.3, 5,
-				 0 | CV_HAAR_SCALE_IMAGE, Size (30, 30));
+    0 | CV_HAAR_SCALE_IMAGE, Size (30, 30));
 
   for (size_t i = 0; i < faces.size (); i++) {
     Mat faceROI = frame (faces[i]);
@@ -114,79 +114,79 @@ get_landmarks (Mat frame)
     // Two eyes condition
     if (eyes.size () == 2) {
 
-	  // The left eye first
-	  if (eyes[0].x < eyes[1].x) {
-	    eye1.x = (faces[i].x + eyes[0].x + eyes[0].width / 2);
-	    eye1.y = (faces[i].y + eyes[0].y + eyes[0].height / 2);
-	    eye2.x = (faces[i].x + eyes[1].x + eyes[1].width / 2);
-	    eye2.y = (faces[i].y + eyes[1].y + eyes[1].height / 2);
-	  }
-	  else {
-	    eye1.x = (faces[i].x + eyes[1].x + eyes[1].width / 2);
-	    eye1.y = (faces[i].y + eyes[1].y + eyes[1].height / 2);
-	    eye2.x = (faces[i].x + eyes[0].x + eyes[0].width / 2);
-	    eye2.y = (faces[i].y + eyes[0].y + eyes[0].height / 2);
-	  }
-	  distance = dist (eye1, eye2);
+      // The left eye first
+      if (eyes[0].x < eyes[1].x) {
+        eye1.x = (faces[i].x + eyes[0].x + eyes[0].width / 2);
+        eye1.y = (faces[i].y + eyes[0].y + eyes[0].height / 2);
+        eye2.x = (faces[i].x + eyes[1].x + eyes[1].width / 2);
+        eye2.y = (faces[i].y + eyes[1].y + eyes[1].height / 2);
+      }
+      else {
+        eye1.x = (faces[i].x + eyes[1].x + eyes[1].width / 2);
+        eye1.y = (faces[i].y + eyes[1].y + eyes[1].height / 2);
+        eye2.x = (faces[i].x + eyes[0].x + eyes[0].width / 2);
+        eye2.y = (faces[i].y + eyes[0].y + eyes[0].height / 2);
+      }
+      distance = dist (eye1, eye2);
 
-	  // Distance between eyes condition
-	  if (distance > min_distance) {
+      // Distance between eyes condition
+      if (distance > min_distance) {
 
-	    // Nose detect
-	    nose_cascade.detectMultiScale (faceROI, nose);
+        // Nose detect
+        nose_cascade.detectMultiScale (faceROI, nose);
 
-	    // One nose condition
-	    if (nose.size () == 1) {
-		  nose1.x = (faces[i].x + nose[0].x + nose[0].width / 2);
-		  nose1.y = (faces[i].y + nose[0].y + nose[0].height / 2);
+        // One nose condition
+        if (nose.size () == 1) {
+          nose1.x = (faces[i].x + nose[0].x + nose[0].width / 2);
+          nose1.y = (faces[i].y + nose[0].y + nose[0].height / 2);
 
-		  // Nose below one eye condition
-		  if ((nose1.y > eye1.y) or (nose1.y > eye2.y)) {
-		    nose_cond = false;
+          // Nose below one eye condition
+          if ((nose1.y > eye1.y) or (nose1.y > eye2.y)) {
+            nose_cond = false;
 
-		    // Mouth detect
-		    mouth_cascade.detectMultiScale (faceROI, mouth);
+            // Mouth detect
+            mouth_cascade.detectMultiScale (faceROI, mouth);
 
-		    // One mouth condition, the other two are eyes
-		    if (mouth.size () == 3) {
-			  mouth1.x = ((faces[i].x + mouth[2].x) * 1.05);
-			  mouth1.y = (faces[i].y + mouth[2].y +
+            // One mouth condition, the other two are eyes
+            if (mouth.size () == 3) {
+              mouth1.x = ((faces[i].x + mouth[2].x) * 1.05);
+              mouth1.y = (faces[i].y + mouth[2].y +
 		        mouth[2].height / 2);
-			  mouth2.x = ((faces[i].x + mouth[2].x +
-				mouth[2].width) * 0.95);
-			  mouth2.y = (faces[i].y + mouth[2].y +
-				mouth[2].height / 2);
-			  // Mouth below nose condition
-			  if (mouth1.y > nose1.y) mouth_cond = false;
-			}
-		  }
-		}
-	    // If nose is not detected, we estimate it
-	    if (nose_cond) {
-		  nose1.x = ((eye1.x + eye2.x) / 2);
-		  nose1.y = ((eye1.y + eye2.y) / 2) + (faces[i].height / 5);
-		  LOGI (APP, "No nose detected");
-		}
+              mouth2.x = ((faces[i].x + mouth[2].x +
+                mouth[2].width) * 0.95);
+              mouth2.y = (faces[i].y + mouth[2].y +
+                mouth[2].height / 2);
+              // Mouth below nose condition
+              if (mouth1.y > nose1.y) mouth_cond = false;
+            }
+          }
+        }
+        // If nose is not detected, we estimate it
+        if (nose_cond) {
+          nose1.x = ((eye1.x + eye2.x) / 2);
+          nose1.y = ((eye1.y + eye2.y) / 2) + (faces[i].height / 5);
+          LOGI (APP, "No nose detected");
+        }
 
-	    // If mouth is not detected, we estimate it
-	    if (mouth_cond) {
-		  mouth1.x = (eye1.x + (nose1.x - eye1.x) / 5);
-		  mouth1.y = (nose1.y + (nose1.y - eye2.y));
-		  mouth2.x = (eye2.x - (eye2.x - nose1.x) / 5);
-		  mouth2.y = (nose1.y + (nose1.y - eye1.y));
-		  LOGI (APP, "No mouth detected");
-		}
+        // If mouth is not detected, we estimate it
+        if (mouth_cond) {
+          mouth1.x = (eye1.x + (nose1.x - eye1.x) / 5);
+          mouth1.y = (nose1.y + (nose1.y - eye2.y));
+          mouth2.x = (eye2.x - (eye2.x - nose1.x) / 5);
+          mouth2.y = (nose1.y + (nose1.y - eye1.y));
+          LOGI (APP, "No mouth detected");
+        }
 
-	    lm[0] = eye1.x;
-	    lm[1] = eye1.y;
-	    lm[2] = eye2.x;
-	    lm[3] = eye2.y;
-	    lm[4] = nose1.x;
-	    lm[5] = nose1.y;
-	    lm[6] = mouth1.x;
-	    lm[7] = mouth1.y;
-	    lm[8] = mouth2.x;
-	    lm[9] = mouth2.y;
+        lm[0] = eye1.x;
+        lm[1] = eye1.y;
+        lm[2] = eye2.x;
+        lm[3] = eye2.y;
+        lm[4] = nose1.x;
+        lm[5] = nose1.y;
+        lm[6] = mouth1.x;
+        lm[7] = mouth1.y;
+        lm[8] = mouth2.x;
+        lm[9] = mouth2.y;
       }
     }
   }

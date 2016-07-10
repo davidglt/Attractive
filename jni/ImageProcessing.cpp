@@ -292,7 +292,7 @@ get_sift (Mat frame)
 
       if (result2 == -1)
         text2 = "UNATTRACTIVE";
-      else if (result1 == 1)
+      else if (result2 == 1)
         text2 = "ATTRACTIVE";
       else
         text2 = "ERROR2";

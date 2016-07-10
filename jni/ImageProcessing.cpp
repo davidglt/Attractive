@@ -205,7 +205,7 @@ get_sift (Mat frame)
   std::vector < KeyPoint > kp;
   Mat descriptors;
   Mat dense (1, 128 * n_landmarks, CV_32FC1);
-  Mat ndense (1, 128 * n_landmarks, CV_32FC1);
+  // Mat ndense (1, 128 * n_landmarks, CV_32FC1);
   Point center;
   int distance;
   int x;
@@ -266,7 +266,7 @@ get_sift (Mat frame)
       }
 
       // Normalize the data with l2 norm
-      //normalize (dense, ndense, 1, 0, NORM_L2);
+      // normalize (dense, ndense, 1, 0, NORM_L2);
 
       SVM clf1;
       SVM clf2;
@@ -276,8 +276,8 @@ get_sift (Mat frame)
       clf2.load ("/sdcard/attractive/models/svm_Attractive.dat");
 
       // Predict the 2 attributes (male & attractive)
-      result1 = clf1.predict (ndense);
-      result2 = clf2.predict (ndense);
+      result1 = clf1.predict (dense);
+      result2 = clf2.predict (dense);
 
       LOGI (APP, "Male: %f", result1);
       LOGI (APP, "Attractive: %f", result2);

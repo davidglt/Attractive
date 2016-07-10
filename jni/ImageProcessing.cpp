@@ -244,14 +244,14 @@ get_sift (Mat frame)
 
     // Draw a circle around the landmarks
     for (int i = 0; i < 5; i++)	{
-      circle (frame, inputs[i], distance * 0.25,
+      circle (frame, inputs[i], distance * 0.3,
         Scalar (0, 255, 0, 0), 8, 8, 0);
     }
 
     if (distance > min_distance) {
       // key points coordinates and sizes assigned
       for (size_t i = 0; i < inputs.size (); i++) {
-        kp.push_back (cv::KeyPoint (inputs[i], distance * 0.25));
+        kp.push_back (cv::KeyPoint (inputs[i], distance * 0.3));
       }
 
       // Compute the keypoints to extract the SIFT information
@@ -266,7 +266,7 @@ get_sift (Mat frame)
       }
 
       // Normalize the data with l2 norm
-      normalize (dense, ndense, 1, 0, NORM_L2);
+      //normalize (dense, ndense, 1, 0, NORM_L2);
 
       SVM clf1;
       SVM clf2;

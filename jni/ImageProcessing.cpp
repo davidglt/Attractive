@@ -17,6 +17,7 @@
 using namespace std;
 using namespace cv;
 
+float kp_size_factor = 0.2;
 int *get_landmarks (Mat frame);
 bool get_sift (Mat frame);
 int dist (Point point1, Point point2);
@@ -205,7 +206,6 @@ get_sift (Mat frame)
   std::vector < KeyPoint > kp;
   Mat descriptors;
   Mat dense (1, 128 * n_landmarks, CV_32FC1);
-  // Mat ndense (1, 128 * n_landmarks, CV_32FC1);
   Point center;
   int distance;
   int x;
@@ -244,14 +244,14 @@ get_sift (Mat frame)
 
     // Draw a circle around the landmarks
     for (int i = 0; i < 5; i++)	{
-      circle (frame, inputs[i], distance * 0.3,
+      circle (frame, inputs[i], distance * kp_size_factor,
         Scalar (0, 255, 0, 0), 8, 8, 0);
     }
 
     if (distance > min_distance) {
       // key points coordinates and sizes assigned
       for (size_t i = 0; i < inputs.size (); i++) {
-        kp.push_back (cv::KeyPoint (inputs[i], distance * 0.3));
+        kp.push_back (cv::KeyPoint (inputs[i], distance * kp_size_factor));
       }
 
       // Compute the keypoints to extract the SIFT information
@@ -264,9 +264,6 @@ get_sift (Mat frame)
             descriptors.at < float >(i, j);
         }
       }
-
-      // Normalize the data with l2 norm
-      // normalize (dense, ndense, 1, 0, NORM_L2);
 
       SVM clf1;
       SVM clf2;

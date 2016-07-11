@@ -11,11 +11,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import es.dragonit.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
@@ -40,6 +42,7 @@ public class Attractive extends Activity
  	protected static WakeLock wakeLock = null;
 	private int PreviewSizeWidth = 640;
  	private int PreviewSizeHeight = 480;
+ 	private int currentCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
  	
    @Override
     public void onCreate(Bundle savedInstanceState) 
@@ -69,16 +72,16 @@ public class Attractive extends Activity
         MyCameraPreview = new ImageView(this);
         
         SurfaceView camView = (SurfaceView) findViewById(R.id.surfaceView);
-        SurfaceHolder camHolder = camView.getHolder();
+        final SurfaceHolder camHolder = camView.getHolder();
+     	camPreview = new CameraPreview(PreviewSizeWidth, PreviewSizeHeight, MyCameraPreview, currentCameraId);
+           
+     	camHolder.setFixedSize((screenHeight-10)/2, (screenHeight-10)*2/3);
+     	camHolder.addCallback(camPreview);
+     	camHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         
-        camPreview = new CameraPreview(PreviewSizeWidth, PreviewSizeHeight, MyCameraPreview);
-        
-        camHolder.setFixedSize((screenHeight-10)/2, (screenHeight-10)*2/3);
-        camHolder.addCallback(camPreview);
-        camHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        
-        secondaryLayout = (ViewGroup) findViewById(R.id.linearLayout2);
-        secondaryLayout.addView(MyCameraPreview, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+     	secondaryLayout = (ViewGroup) findViewById(R.id.linearLayout2);
+     	secondaryLayout.addView(MyCameraPreview, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+     	   	
     }
     protected void onPause()
 	{
@@ -169,12 +172,28 @@ public class Attractive extends Activity
     public boolean onOptionsItemSelected(MenuItem item) {
     	
     	switch (item.getItemId()) {
+    		case R.id.mMenuSwitchCamera:
+    			//swap the id of the camera to be used
+ 	    		if(currentCameraId == Camera.CameraInfo.CAMERA_FACING_BACK) {
+ 	    			currentCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
+ 	    		}
+ 	    		else {
+ 	    			currentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+ 	    		}
+ 	    		SurfaceView camView = (SurfaceView) findViewById(R.id.surfaceView);
+ 	    		final SurfaceHolder camHolder = camView.getHolder();
+ 	    
+ 	    		camPreview.switchCamera(camHolder, currentCameraId);
+    			return true;
+    			
         	case R.id.mMenuAbout:
         		launchAbout(mainLayout);
         		return true;
+        		
         	case R.id.mMenuFinish:
         		finish();
         		return true;
+        		
         	default:
         		return super.onOptionsItemSelected(item);
     	}
@@ -185,5 +204,4 @@ public class Attractive extends Activity
     	Intent i = new Intent (this, MenuAbout.class);
     	startActivity (i);
     }
-
 }

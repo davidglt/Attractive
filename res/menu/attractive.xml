@@ -3,6 +3,11 @@
     tools:context="es.dragonit.Attractive" >
     
     <item
+        android:id="@+id/mMenuSwitchCamera"
+        android:src="@+android:drawable/ic_menu_camera"
+        android:showAsAction="ifRoom"
+        android:title="@string/mMenuSwitchCamera"/>
+    <item
         android:id="@+id/mMenuAbout"
         android:showAsAction="never"
         android:title="@string/mMenuAbout"/>

@@ -9,7 +9,6 @@ package es.dragonit;
 import java.io.IOException;
 
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -17,7 +16,6 @@ import android.widget.ImageView;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
-import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 
 public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCallback
@@ -32,24 +30,26 @@ public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCall
 	private int PreviewSizeWidth;
  	private int PreviewSizeHeight;
  	private boolean bProcessing = false;
- 	Integer previewFormat = 17; 
-	
+ 	Integer previewFormat = 17;
+ 	private int cameraId;
+	 	
  	Handler mHandler = new Handler(Looper.getMainLooper());
  	
 	public CameraPreview(int PreviewlayoutWidth, int PreviewlayoutHeight,
-    		ImageView CameraPreview)
+    		ImageView CameraPreview, int currentCameraId)
     {
 		PreviewSizeWidth = PreviewlayoutWidth;
     	PreviewSizeHeight = PreviewlayoutHeight;
     	MyCameraPreview = CameraPreview;
     	bitmap = Bitmap.createBitmap(PreviewSizeWidth, PreviewSizeHeight, Bitmap.Config.ARGB_8888);
     	pixels = new int[PreviewSizeWidth * PreviewSizeHeight];
+    	cameraId = currentCameraId;
     }
 
 	@Override
 	public void onPreviewFrame(byte[] arg0, Camera arg1) 
 	{
-		//We only accept the NV21(YUV420) format.
+		// We only accept the NV21(YUV420) format.
 		if (imageFormat == ImageFormat.NV21)
 		{
 			if ( !bProcessing )
@@ -73,13 +73,13 @@ public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCall
 		mCamera.setParameters(parameters);
 		mCamera.startPreview();
 	}
-
+	
 	@Override
-	public void surfaceCreated(SurfaceHolder arg0) 
+	public void surfaceCreated(SurfaceHolder arg0)
 	{
-		//mCamera = Camera.open(CameraInfo.CAMERA_FACING_FRONT);
-		// Open in a thread, not in UI
-		startCamera();
+		    		
+		mCamera = Camera.open(cameraId);
+		
 		try
 		{
 			// If did not set the SurfaceHolder, the preview area will be black.
@@ -102,6 +102,35 @@ public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCall
 		mCamera = null;
 	}
 
+	public void switchCamera(SurfaceHolder arg0, int cameraId) {
+		if (mCamera != null) {
+			mCamera.setPreviewCallback(null);
+			mCamera.stopPreview();
+			mCamera.release();
+			mCamera = null;
+		}
+		
+		// swap the id of the camera to be used
+		
+		mCamera = Camera.open(cameraId);
+		
+		try
+		{
+			// If did not set the SurfaceHolder, the preview area will be black.
+			mCamera.setPreviewDisplay(arg0);
+			mCamera.setPreviewCallback(this);
+		} 
+		catch (IOException e)
+		{
+			mCamera.release();
+			mCamera = null;
+		}
+		
+		mCamera.startPreview();
+
+	}
+	
+	
 	//
 	// Native JNI 
 	//
@@ -132,44 +161,4 @@ public class CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCall
 			bProcessing = false;
         }
     };
-    
-    private void startCamera() {
-        if (mThread == null) {
-            mThread = new CameraHandlerThread();
-        }
-
-        synchronized (mThread) {
-            mThread.openCamera();
-        }
-    }
-    private CameraHandlerThread mThread = null;
-    private static class CameraHandlerThread extends HandlerThread {
-        Handler mHandler = null;
-
-        CameraHandlerThread() {
-            super("CameraHandlerThread");
-            start();
-            mHandler = new Handler(getLooper());
-        }
-
-        synchronized void notifyCameraOpened() {
-            notify();
-        }
-
-        void openCamera() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                	mCamera = Camera.open(CameraInfo.CAMERA_FACING_FRONT);
-                    notifyCameraOpened();
-                }
-            });
-            try {
-                wait();
-            }
-            catch (InterruptedException e) {
-            }
-        }
-    }
-
-   }
+}
